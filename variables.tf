@@ -304,12 +304,26 @@ variable "bucket_name" {
 
 variable "object_lock_configuration" {
   type = object({
-    mode  = string # Valid values are GOVERNANCE and COMPLIANCE.
-    days  = number
-    years = number
+    mode  = optional(string) # Valid values are GOVERNANCE and COMPLIANCE.
+    days  = optional(number)
+    years = optional(number)
   })
   default     = null
-  description = "A configuration for S3 object locking. With S3 Object Lock, you can store objects using a `write once, read many` (WORM) model. Object Lock can help prevent objects from being deleted or overwritten for a fixed amount of time or indefinitely."
+  description = <<EOF
+    A configuration for S3 object locking. With S3 Object Lock, you can store objects using a `write once, read many` (WORM) model.
+    Object Lock can help prevent objects from being deleted or overwritten for a fixed amount of time or indefinitely.
+    If `object_lock_configuration` is an empty object, which is `{}`. The bucket will be created with object lock configuration, but no default retention.
+  EOF
+}
+
+locals {
+  is_empty_obj_lock_cfg = var.object_lock_configuration == null ? true : (
+    length(compact([
+      var.object_lock_configuration.mode,
+      var.object_lock_configuration.days,
+      var.object_lock_configuration.years,
+    ])) == 0
+  )
 }
 
 variable "website_redirect_all_requests_to" {

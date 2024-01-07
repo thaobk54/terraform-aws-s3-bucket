@@ -305,11 +305,15 @@ resource "aws_s3_bucket_object_lock_configuration" "default" {
 
   object_lock_enabled = "Enabled"
 
-  rule {
-    default_retention {
-      mode  = var.object_lock_configuration.mode
-      days  = var.object_lock_configuration.days
-      years = var.object_lock_configuration.years
+  dynamic "rule" {
+    for_each = local.is_empty_obj_lock_cfg ? [] : [{}]
+
+    content {
+      default_retention {
+        mode  = var.object_lock_configuration.mode
+        days  = var.object_lock_configuration.days
+        years = var.object_lock_configuration.years
+      }
     }
   }
 }
